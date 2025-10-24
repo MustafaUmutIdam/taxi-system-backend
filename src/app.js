@@ -2,13 +2,14 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import stationRoutes from './routes/stationRoutes.js';
+import driverRoutes from './routes/driverRoutes.js';
 
 const app = express();
 
 // Middleware'ler
-app.use(helmet()); // Güvenlik headers
+app.use(helmet());
 app.use(cors({
-  origin: process.env.ALLOWED_ORIGINS?.split(',') || '*',
+  origin: ['http://localhost:5173', 'http://localhost:3000'], // Frontend portları
   credentials: true
 }));
 app.use(express.json());
@@ -22,6 +23,7 @@ app.use((req, res, next) => {
 
 // Routes
 app.use('/api/stations', stationRoutes);
+app.use('/api/drivers', driverRoutes);
 
 // Ana route
 app.get('/', (req, res) => {

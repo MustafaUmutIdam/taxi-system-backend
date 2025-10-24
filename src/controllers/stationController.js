@@ -28,7 +28,10 @@ class StationController {
         data: station
       });
     } catch (error) {
-      next(error);
+      res.status(404).json({
+        success: false,
+        message: error.message || 'Station not found'
+      });
     }
   }
 
@@ -51,7 +54,10 @@ class StationController {
         data: station
       });
     } catch (error) {
-      next(error);
+      res.status(400).json({
+        success: false,
+        message: error.message || 'Error creating station'
+      });
     }
   }
 
@@ -77,7 +83,10 @@ class StationController {
         data: station
       });
     } catch (error) {
-      next(error);
+      res.status(400).json({
+        success: false,
+        message: error.message || 'Error updating station'
+      });
     }
   }
 
@@ -91,7 +100,10 @@ class StationController {
         message: 'Station deleted successfully'
       });
     } catch (error) {
-      next(error);
+      res.status(404).json({
+        success: false,
+        message: error.message || 'Station not found'
+      });
     }
   }
 
@@ -119,7 +131,10 @@ class StationController {
         data: stations
       });
     } catch (error) {
-      next(error);
+      res.status(400).json({
+        success: false,
+        message: error.message
+      });
     }
   }
 }
