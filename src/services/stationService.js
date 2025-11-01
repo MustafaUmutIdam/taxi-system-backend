@@ -1,10 +1,16 @@
 import Station from '../models/Station.js';
+import User from '../models/User.js';
 
 class StationService {
-  // Tüm istasyonları getir
-  async getAllStations(filters = {}) {
+  // Kullanıcıya göre istasyonları getir
+  async getAllStations(filters = {}, userId, userRole) {
     try {
       const query = {};
+      
+      // Admin değilse sadece kendi istasyonlarını görsün
+      if (userRole !== 'admin') {
+        query.manager = userId;
+      }
       
       // İsme göre arama
       if (filters.search) {
@@ -19,11 +25,18 @@ class StationService {
   }
 
   // ID'ye göre istasyon getir
-  async getStationById(id) {
+  async getStationById(id, userId, userRole) {
     try {
-      const station = await Station.findById(id);
+      const query = { _id: id };
+      
+      // Admin değilse sadece kendi istasyonunu görsün
+      if (userRole !== 'admin') {
+        query.manager = userId;
+      }
+
+      const station = await Station.findOne(query);
       if (!station) {
-        throw new Error('Station not found');
+        throw new Error('Station not found or you do not have permission');
       }
       return station;
     } catch (error) {
@@ -32,10 +45,19 @@ class StationService {
   }
 
   // Yeni istasyon oluştur
-  async createStation(stationData) {
+  async createStation(stationData, userId) {
     try {
+      // Manager olarak kullanıcıyı ata
+      stationData.manager = userId;
+      
       const station = new Station(stationData);
       await station.save();
+      
+      // User'ın managedStations'ına ekle
+      await User.findByIdAndUpdate(userId, {
+        $addToSet: { managedStations: station._id }
+      });
+      
       return station;
     } catch (error) {
       throw new Error(`Error creating station: ${error.message}`);
@@ -43,16 +65,23 @@ class StationService {
   }
 
   // İstasyon güncelle
-  async updateStation(id, updateData) {
+  async updateStation(id, updateData, userId, userRole) {
     try {
-      const station = await Station.findByIdAndUpdate(
-        id,
+      const query = { _id: id };
+      
+      // Admin değilse sadece kendi istasyonunu güncelleyebilir
+      if (userRole !== 'admin') {
+        query.manager = userId;
+      }
+
+      const station = await Station.findOneAndUpdate(
+        query,
         updateData,
         { new: true, runValidators: true }
       );
       
       if (!station) {
-        throw new Error('Station not found');
+        throw new Error('Station not found or you do not have permission');
       }
       
       return station;
@@ -62,19 +91,32 @@ class StationService {
   }
 
   // İstasyon sil
-  async deleteStation(id) {
+  async deleteStation(id, userId, userRole) {
     try {
-      const station = await Station.findByIdAndDelete(id);
-      if (!station) {
-        throw new Error('Station not found');
+      const query = { _id: id };
+      
+      // Admin değilse sadece kendi istasyonunu silebilir
+      if (userRole !== 'admin') {
+        query.manager = userId;
       }
+
+      const station = await Station.findOneAndDelete(query);
+      if (!station) {
+        throw new Error('Station not found or you do not have permission');
+      }
+      
+      // User'ın managedStations'ından çıkar
+      await User.findByIdAndUpdate(userId, {
+        $pull: { managedStations: id }
+      });
+      
       return station;
     } catch (error) {
       throw new Error(`Error deleting station: ${error.message}`);
     }
   }
 
-  // Yakındaki istasyonları bul (koordinatlara göre)
+  // Yakındaki istasyonları bul
   async getNearbyStations(lat, lng, maxDistance = 5000) {
     try {
       const stations = await Station.find({
@@ -82,7 +124,6 @@ class StationService {
         'location.lng': { $exists: true }
       });
 
-      // Basit mesafe hesaplama
       const stationsWithDistance = stations.map(station => {
         const distance = this.calculateDistance(
           lat, lng,
@@ -99,9 +140,9 @@ class StationService {
     }
   }
 
-  // Haversine formülü ile mesafe hesaplama (metre)
+  // Haversine formülü
   calculateDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371e3; // Dünya yarıçapı (metre)
+    const R = 6371e3;
     const φ1 = lat1 * Math.PI / 180;
     const φ2 = lat2 * Math.PI / 180;
     const Δφ = (lat2 - lat1) * Math.PI / 180;

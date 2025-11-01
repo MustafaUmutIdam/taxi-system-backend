@@ -6,7 +6,11 @@ class StationController {
   async getAllStations(req, res, next) {
     try {
       const { search } = req.query;
-      const stations = await stationService.getAllStations({ search });
+      const stations = await stationService.getAllStations(
+        { search }, 
+        req.user._id, 
+        req.user.role
+      );
       
       res.status(200).json({
         success: true,
@@ -14,14 +18,21 @@ class StationController {
         data: stations
       });
     } catch (error) {
-      next(error);
+      res.status(400).json({
+        success: false,
+        message: error.message
+      });
     }
   }
 
   // GET /api/stations/:id
   async getStationById(req, res, next) {
     try {
-      const station = await stationService.getStationById(req.params.id);
+      const station = await stationService.getStationById(
+        req.params.id, 
+        req.user._id, 
+        req.user.role
+      );
       
       res.status(200).json({
         success: true,
@@ -30,7 +41,7 @@ class StationController {
     } catch (error) {
       res.status(404).json({
         success: false,
-        message: error.message || 'Station not found'
+        message: error.message
       });
     }
   }
@@ -46,7 +57,7 @@ class StationController {
         });
       }
 
-      const station = await stationService.createStation(req.body);
+      const station = await stationService.createStation(req.body, req.user._id);
       
       res.status(201).json({
         success: true,
@@ -56,7 +67,7 @@ class StationController {
     } catch (error) {
       res.status(400).json({
         success: false,
-        message: error.message || 'Error creating station'
+        message: error.message
       });
     }
   }
@@ -74,7 +85,9 @@ class StationController {
 
       const station = await stationService.updateStation(
         req.params.id,
-        req.body
+        req.body,
+        req.user._id,
+        req.user.role
       );
       
       res.status(200).json({
@@ -85,7 +98,7 @@ class StationController {
     } catch (error) {
       res.status(400).json({
         success: false,
-        message: error.message || 'Error updating station'
+        message: error.message
       });
     }
   }
@@ -93,7 +106,7 @@ class StationController {
   // DELETE /api/stations/:id
   async deleteStation(req, res, next) {
     try {
-      await stationService.deleteStation(req.params.id);
+      await stationService.deleteStation(req.params.id, req.user._id, req.user.role);
       
       res.status(200).json({
         success: true,
@@ -102,12 +115,12 @@ class StationController {
     } catch (error) {
       res.status(404).json({
         success: false,
-        message: error.message || 'Station not found'
+        message: error.message
       });
     }
   }
 
-  // GET /api/stations/nearby?lat=X&lng=Y&distance=Z
+  // GET /api/stations/nearby
   async getNearbyStations(req, res, next) {
     try {
       const { lat, lng, distance } = req.query;

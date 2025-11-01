@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import stationRoutes from './routes/stationRoutes.js';
+import authRoutes from './routes/authRoutes.js';
 import driverRoutes from './routes/driverRoutes.js';
 
 const app = express();
@@ -9,7 +10,7 @@ const app = express();
 // Middleware'ler
 app.use(helmet());
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000'], // Frontend portları
+  origin: ['http://localhost:5173', 'http://localhost:3000'],
   credentials: true
 }));
 app.use(express.json());
@@ -22,6 +23,7 @@ app.use((req, res, next) => {
 });
 
 // Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/stations', stationRoutes);
 app.use('/api/drivers', driverRoutes);
 
@@ -31,6 +33,7 @@ app.get('/', (req, res) => {
     message: 'Taxi System API',
     version: '1.0.0',
     endpoints: {
+      auth: '/api/auth',
       stations: '/api/stations'
     }
   });
