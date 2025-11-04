@@ -39,6 +39,6 @@ const stationSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 stationSchema.index({ location: '2dsphere' });
-
+// Create and export model
 const Station = mongoose.model('Station', stationSchema);
 export default Station;

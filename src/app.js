@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import stationRoutes from './routes/stationRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import driverRoutes from './routes/driverRoutes.js';
+import tripRoutes from './routes/tripRoutes.js';
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use((req, res, next) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/stations', stationRoutes);
 app.use('/api/drivers', driverRoutes);
+app.use('/api/trips', tripRoutes);
 
 // Ana route
 app.get('/', (req, res) => {
@@ -34,7 +36,9 @@ app.get('/', (req, res) => {
     version: '1.0.0',
     endpoints: {
       auth: '/api/auth',
-      stations: '/api/stations'
+      stations: '/api/stations',
+      drivers: '/api/drivers',
+      trips: '/api/trips'
     }
   });
 });

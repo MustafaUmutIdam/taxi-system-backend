@@ -1,4 +1,3 @@
-// src/models/Driver.js
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
@@ -11,7 +10,11 @@ const driverSchema = new mongoose.Schema({
   vehiclePlate: { type: String, required: true },
   station: { type: mongoose.Schema.Types.ObjectId, ref: "Station", required: true },
   status: { type: String, enum: ["active", "busy", "offline", "break"], default: "offline" },
-  currentLocation: { lat: Number, lng: Number, lastUpdated: Date },
+  currentLocation: {
+    lat: { type: Number },
+    lng: { type: Number },
+    lastUpdated: { type: Date }
+  },
   profileImage: { type: String },
   rating: { type: Number, default: 5.0, min: 0, max: 5 },
   totalTrips: { type: Number, default: 0 },
@@ -22,12 +25,26 @@ const driverSchema = new mongoose.Schema({
   fcmToken: { type: String }
 }, { timestamps: true });
 
+// 🔒 Şifre hashleme
 driverSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   this.password = await bcrypt.hash(this.password, 12);
   next();
 });
 
+// 📍 Varsayılan konum ekleme (örnek: Ankara)
+driverSchema.pre("save", function (next) {
+  if (!this.currentLocation || !this.currentLocation.lat || !this.currentLocation.lng) {
+    this.currentLocation = {
+      lat: 39.9208, // Ankara merkez
+      lng: 32.8541,
+      lastUpdated: new Date()
+    };
+  }
+  next();
+});
+
+// 🔑 Şifre karşılaştırma metodu
 driverSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };

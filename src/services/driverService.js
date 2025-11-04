@@ -1,6 +1,7 @@
 // src/services/driverService.js
 import Driver from "../models/Driver.js";
 import Station from "../models/Station.js";
+import Trip from '../models/Trip.js';
 
 class DriverService {
   async getAllDrivers(filters = {}) {
@@ -85,6 +86,26 @@ class DriverService {
       return drivers;
     } catch (err) {
       throw new Error(`Error fetching station drivers: ${err.message}`);
+    }
+  }
+}
+
+export async function resetStuckDrivers() {
+
+  console.log("🔍 Checking for stuck drivers...");
+
+  const busyDrivers = await Driver.find({ status: 'busy' });
+
+  for (const driver of busyDrivers) {
+    const activeTrip = await Trip.findOne({
+      driver: driver._id,
+      status: { $in: ['assigned', 'accepted', 'in_progress'] }
+    });
+
+    if (!activeTrip) {
+      driver.status = 'active';
+      await driver.save();
+      console.log(`♻️ Driver ${driver.fullName} reset to active`);
     }
   }
 }

@@ -1,3 +1,5 @@
+import mongoose from 'mongoose';
+
 const tripSchema = new mongoose.Schema({
   // Referanslar
   station: { 
@@ -46,26 +48,34 @@ const tripSchema = new mongoose.Schema({
   
   // Mesafe ve ücret
   distance: { type: Number }, // km
+  estimatedDuration: { type: Number }, // dakika
   estimatedFare: { type: Number }, // TL
   actualFare: { type: Number }, // Gerçekleşen ücret
   
   // Zaman bilgileri
   requestedAt: { type: Date, default: Date.now },
+  assignedAt: { type: Date },
   acceptedAt: { type: Date },
   startedAt: { type: Date },
   completedAt: { type: Date },
   
-  // Reddeden şoförler (havuz sistemi için)
+  // Driver eşleştirme (havuz sistemi)
+  currentAttempt: { type: Number, default: 0 },
+  maxAttempts: { type: Number, default: 10 },
+  assignmentExpiry: { type: Date }, // 15 saniye sonrası
+  
+  // Reddeden şoförler
   rejectedDrivers: [{
     driver: { type: mongoose.Schema.Types.ObjectId, ref: 'Driver' },
-    rejectedAt: { type: Date }
+    rejectedAt: { type: Date, default: Date.now },
+    reason: { type: String }
   }],
   
   // İptal bilgileri
   cancellationReason: { type: String },
   cancelledBy: { 
     type: String, 
-    enum: ['station', 'driver', 'customer'] 
+    enum: ['station', 'driver', 'customer', 'system'] 
   },
   
   // Notlar
@@ -76,15 +86,24 @@ const tripSchema = new mongoose.Schema({
     type: String,
     enum: ['pending', 'paid', 'cancelled'],
     default: 'pending'
+  },
+  
+  // Fiyat detayları
+  fareDetails: {
+    baseRate: { type: Number },
+    perKmRate: { type: Number },
+    distance: { type: Number },
+    isNightTime: { type: Boolean },
+    nightSurcharge: { type: Number },
+    total: { type: Number }
   }
-}, { timestamps: true });
+}, { 
+  timestamps: true 
+});
 
 // Index'ler
 tripSchema.index({ station: 1, status: 1, createdAt: -1 });
 tripSchema.index({ driver: 1, status: 1 });
+tripSchema.index({ status: 1, assignmentExpiry: 1 });
 
-tripSchema.index({ "pickup.location": "2dsphere" });
-tripSchema.index({ "dropoff.location": "2dsphere" });
-
-
-export const Trip = mongoose.model('Trip', tripSchema);
+export default mongoose.model('Trip', tripSchema);
