@@ -5,7 +5,7 @@ const tripSchema = new mongoose.Schema({
   station: { 
     type: mongoose.Schema.Types.ObjectId, 
     ref: 'Station',
-    required: true
+    required: false
   },
   driver: { 
     type: mongoose.Schema.Types.ObjectId, 
