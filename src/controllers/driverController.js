@@ -63,6 +63,32 @@ class DriverController {
       return res.status(400).json({ success: false, message: err.message });
     }
   }
+
+  async updateDriverStatus(req, res, next) {
+    try {
+      const { status } = req.body;
+      if (!status) {
+        return res.status(400).json({ success: false, message: 'Status is required' });
+      }
+      const driver = await driverService.updateDriverStatus(req.params.id, status);
+      return res.status(200).json({ success: true, message: 'Driver status updated successfully', data: driver });
+    } catch (err) {
+      return res.status(400).json({ success: false, message: err.message });
+    }
+  }
+
+  async updateDriverLocation(req, res, next) {
+    try {
+      const { lat, lng } = req.body;
+      if (lat === undefined || lng === undefined) {
+        return res.status(400).json({ success: false, message: 'Latitude and longitude are required' });
+      }
+      const driver = await driverService.updateDriverLocation(req.params.id, { lat, lng });
+      return res.status(200).json({ success: true, message: 'Driver location updated successfully', data: driver });
+    } catch (err) {
+      return res.status(400).json({ success: false, message: err.message });
+    }
+  }
 }
 
 export default new DriverController();

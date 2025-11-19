@@ -1,32 +1,33 @@
-// src/routes/driverRoutes.js
-import express from "express";
-import { body } from "express-validator";
-import driverController from "../controllers/driverController.js";
-import { protect, restrictTo } from "../middleware/auth.js";
+
+import express from 'express';
+import { body } from 'express-validator';
+import driverController from '../controllers/driverController.js';
+import { protect, restrictTo } from '../middleware/auth.js';
 
 const router = express.Router();
 
 // Validation
 const driverValidation = [
-  body("fullName").trim().notEmpty().withMessage("Driver name is required"),
-  body("phone").trim().notEmpty().withMessage("Phone number is required"),
-  body("licenseNumber").trim().notEmpty().withMessage("License number is required"),
-  body("vehiclePlate").trim().notEmpty().withMessage("Vehicle plate is required"),
-  body("station").notEmpty().withMessage("Station ID is required"),
+  body('fullName').trim().notEmpty().withMessage('Full name required'),
+  body('phone').trim().notEmpty().withMessage('Phone required'),
+  body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
+  body('licenseNumber').trim().notEmpty().withMessage('License number required'),
+  body('vehiclePlate').trim().notEmpty().withMessage('Vehicle plate required'),
+  body('station').isMongoId().withMessage('Valid station ID required'),
 ];
 
-// 🔒 Tüm driver işlemleri authentication gerektirir
+// PUBLIC route - Driver registration (mobil uygulama için)
+router.post('/', driverValidation, driverController.createDriver);
+
+// Protected routes
 router.use(protect);
 
-// --- Routes ---
-// Herkes (giriş yapan) şoförleri listeleyebilir
-router.get("/", driverController.getAllDrivers);
-router.get("/:id", driverController.getDriverById);
-router.get("/station/:stationId", driverController.getDriversByStation);
-
-// Sadece admin veya durak yöneticisi şoför ekleyebilir / düzenleyebilir / silebilir
-router.post("/", restrictTo("admin", "station_manager"), driverValidation, driverController.createDriver);
-router.put("/:id", restrictTo("admin", "station_manager"), driverValidation, driverController.updateDriver);
-router.delete("/:id", restrictTo("admin", "station_manager"), driverController.deleteDriver);
+router.get('/', driverController.getAllDrivers);
+router.get('/:id', driverController.getDriverById);
+router.get('/station/:stationId', driverController.getDriversByStation);
+router.put('/:id', restrictTo('admin', 'station_manager'), driverController.updateDriver);
+router.delete('/:id', restrictTo('admin', 'station_manager'), driverController.deleteDriver);
+router.patch('/:id/status', driverController.updateDriverStatus);
+router.patch('/:id/location', driverController.updateDriverLocation);
 
 export default router;

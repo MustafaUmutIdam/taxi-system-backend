@@ -5,13 +5,14 @@ import stationRoutes from './routes/stationRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import driverRoutes from './routes/driverRoutes.js';
 import tripRoutes from './routes/tripRoutes.js';
+import driverAuthRoutes from './routes/driverAuthRoutes.js';
 
 const app = express();
 
 // Middleware'ler
 app.use(helmet());
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000'],
+  origin: ['http://localhost:5173', 'http://localhost:3000', 'http://10.0.2.2:3000'],
   credentials: true
 }));
 app.use(express.json());
@@ -28,6 +29,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/stations', stationRoutes);
 app.use('/api/drivers', driverRoutes);
 app.use('/api/trips', tripRoutes);
+app.use('/api/driver-auth', driverAuthRoutes);
 
 // Ana route
 app.get('/', (req, res) => {
@@ -38,7 +40,8 @@ app.get('/', (req, res) => {
       auth: '/api/auth',
       stations: '/api/stations',
       drivers: '/api/drivers',
-      trips: '/api/trips'
+      trips: '/api/trips',
+      driverAuth: '/api/driver-auth',
     }
   });
 });
