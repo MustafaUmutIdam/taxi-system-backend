@@ -70,6 +70,26 @@ class TripController {
     }
   }
 
+  // GET /api/trips/active (Driver endpoint)
+  async getActiveTrip(req, res) {
+    try {
+      const driverId = req.driver && req.driver._id;
+      if (!driverId) {
+        return res.status(401).json({ success: false, message: 'Driver not authenticated' });
+      }
+
+      const trip = await tripService.getActiveTripForDriver(driverId);
+
+      if (!trip) {
+        return res.status(200).json({ success: true, data: null, message: 'No active trip' });
+      }
+
+      return res.status(200).json({ success: true, data: trip });
+    } catch (error) {
+      return res.status(400).json({ success: false, message: error.message });
+    }
+  }
+
   // POST /api/trips/:id/resend
   async resendTrip(req, res) {
     try {
@@ -128,7 +148,8 @@ class TripController {
   // POST /api/trips/:id/start (Driver endpoint)
   async startTrip(req, res) {
     try {
-      const driverId = req.driver?._id || req.user?._id || '690747f7ddd7a37537d0468a'; // <-- test driver ID
+      const driverId  = req.driver._id;
+
       const trip = await tripService.startTrip(req.params.id, driverId);
 
       res.status(200).json({
@@ -150,7 +171,7 @@ class TripController {
     const { actualFare } = req.body;
 
     // Login yapılmadıysa test amaçlı default driverId kullan
-    const driverId = req.driver?._id || req.user?._id || '690747f7ddd7a37537d0468a';
+    const driverId = req.driver._id;
 
     const trip = await tripService.completeTrip(req.params.id, driverId, actualFare);
 

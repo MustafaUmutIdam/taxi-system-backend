@@ -350,6 +350,27 @@ class TripService {
     }
   }
 
+  // Aktif (o anda ataması/başlatılmış/in_progress/accepted) trip'i getir (driver için)
+  async getActiveTripForDriver(driverId) {
+    try {
+      const trip = await Trip.findOne({
+        driver: driverId,
+        status: { $in: ['assigned', 'accepted', 'in_progress'] }
+      })
+      .populate('station')
+      .populate({
+        path: 'driver',
+        populate: { path: 'station' }
+      })
+      .populate('createdBy', 'fullName email');
+
+
+      return trip;
+    } catch (error) {
+      throw new Error(`Error fetching active trip: ${error.message}`);
+    }
+  }
+
   // Timeout kontrolü (Cron job için)
   async checkExpiredAssignments() {
     try {

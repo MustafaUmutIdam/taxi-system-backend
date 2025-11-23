@@ -17,19 +17,12 @@ const tripValidation = [
   body('dropoff.location.lng').isFloat({ min: -180, max: 180 }).withMessage('Invalid dropoff longitude'),
 ];
 
-// Tüm route'lar authentication gerektiriyor
+// Admin / Operator için authentication
 router.use(protect);
 
-// Trip CRUD
 router.get('/', tripController.getAllTrips);
 router.get('/:id', tripController.getTripById);
 router.post('/', restrictTo('admin', 'station_manager', 'operator'), tripValidation, tripController.createTrip);
 router.post('/:id/resend', restrictTo('admin', 'station_manager', 'operator'), tripController.resendTrip);
-
-// Driver actions (bu route'lar için ayrı driver middleware gerekecek - şimdilik kullanıcı olarak)
-router.post('/:id/accept', tripController.acceptTrip);
-router.post('/:id/reject', tripController.rejectTrip);
-router.post('/:id/start', tripController.startTrip);
-router.post('/:id/complete', tripController.completeTrip);
 
 export default router;

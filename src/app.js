@@ -6,6 +6,7 @@ import authRoutes from './routes/authRoutes.js';
 import driverRoutes from './routes/driverRoutes.js';
 import tripRoutes from './routes/tripRoutes.js';
 import driverAuthRoutes from './routes/driverAuthRoutes.js';
+import driverTripRoutes from './routes/driverTripRoutes.js';
 
 const app = express();
 
@@ -28,8 +29,10 @@ app.use((req, res, next) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/stations', stationRoutes);
 app.use('/api/drivers', driverRoutes);
-app.use('/api/trips', tripRoutes);
 app.use('/api/driver-auth', driverAuthRoutes);
+app.use("/api/trips", tripRoutes); // admin & operator için
+app.use("/api/driver-trips", driverTripRoutes); // DRIVER için
+
 
 // Ana route
 app.get('/', (req, res) => {
