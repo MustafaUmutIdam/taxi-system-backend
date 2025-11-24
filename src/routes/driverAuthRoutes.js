@@ -25,5 +25,6 @@ router.get('/me', protectDriver, driverAuthController.getMe);
 router.put('/profile', protectDriver, driverAuthController.updateProfile);
 router.patch('/status', protectDriver, driverAuthController.updateStatus);
 router.put('/change-password', protectDriver, driverAuthController.changePassword);
+router.get('/trips', protectDriver, driverAuthController.getDriverTrips);
 
 export default router;

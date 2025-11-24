@@ -175,6 +175,31 @@ class DriverAuthService {
 
   return driver;
 }
+
+  // Şoför'ün tüm yolculuklarını getir (status'a göre filtreleme yapılabilir)
+  async getDriverTrips(driverId, filters = {}) {
+    try {
+      const Trip = (await import('../models/Trip.js')).default;
+      
+      const query = { driver: driverId };
+      
+      // Status filtrelemesi
+      if (filters.status) {
+        query.status = filters.status;
+      }
+
+      const trips = await Trip.find(query)
+        .populate('station', 'name address')
+        .populate('createdBy', 'fullName email')
+        .sort({ createdAt: -1 })
+        .limit(filters.limit || 10)
+        .skip(filters.offset || 0);
+
+      return trips;
+    } catch (error) {
+      throw new Error(`Yolculuklar alınamadı: ${error.message}`);
+    }
+  }
 }
 
 export default new DriverAuthService();

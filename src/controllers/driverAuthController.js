@@ -146,6 +146,29 @@ class DriverAuthController {
       });
     }
   }
+
+  // GET /api/driver-auth/trips
+  async getDriverTrips(req, res) {
+    try {
+      const { status, limit = 10, offset = 0 } = req.query;
+      
+      const trips = await driverAuthService.getDriverTrips(
+        req.driver._id,
+        { status, limit: parseInt(limit), offset: parseInt(offset) }
+      );
+
+      res.status(200).json({
+        success: true,
+        count: trips.length,
+        data: trips
+      });
+    } catch (error) {
+      res.status(400).json({
+        success: false,
+        message: error.message
+      });
+    }
+  }
 }
 
 export default new DriverAuthController();
