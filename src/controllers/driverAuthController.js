@@ -90,6 +90,32 @@ class DriverAuthController {
     }
   }
 
+  async updateStatus(req, res) {
+  try {
+    const { status } = req.body;
+
+    if (!status) {
+      return res.status(400).json({
+        success: false,
+        message: "Status gereklidir"
+      });
+    }
+
+    const driver = await driverAuthService.updateStatus(req.driver._id, status);
+
+    res.status(200).json({
+      success: true,
+      message: "Durum güncellendi",
+      data: driver
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message
+    });
+  }
+}
+
   // PUT /api/driver-auth/change-password
   async changePassword(req, res) {
     try {

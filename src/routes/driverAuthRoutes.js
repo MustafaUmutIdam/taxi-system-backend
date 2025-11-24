@@ -2,6 +2,7 @@ import express from 'express';
 import { body } from 'express-validator';
 import driverAuthController from '../controllers/driverAuthController.js';
 import { protectDriver } from '../middleware/driverAuth.js';
+import DriverAuthService from '../services/driverAuthService.js';
 
 const router = express.Router();
 
@@ -22,6 +23,7 @@ router.post('/login', driverAuthController.login);
 // Protected routes
 router.get('/me', protectDriver, driverAuthController.getMe);
 router.put('/profile', protectDriver, driverAuthController.updateProfile);
+router.patch('/status', protectDriver, driverAuthController.updateStatus);
 router.put('/change-password', protectDriver, driverAuthController.changePassword);
 
 export default router;

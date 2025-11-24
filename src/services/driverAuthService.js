@@ -156,6 +156,25 @@ class DriverAuthService {
       throw new Error(error.message);
     }
   }
+
+  async updateStatus(driverId, status) {
+  const allowed = ["active", "break", "offline"];
+  if (!allowed.includes(status)) {
+    throw new Error("Geçersiz durum");
+  }
+
+  const driver = await Driver.findByIdAndUpdate(
+    driverId,
+    { status },
+    { new: true }
+  );
+
+  if (!driver) {
+    throw new Error("Şoför bulunamadı");
+  }
+
+  return driver;
+}
 }
 
 export default new DriverAuthService();

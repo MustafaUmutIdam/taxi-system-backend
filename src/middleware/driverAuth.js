@@ -3,6 +3,7 @@ import Driver from '../models/Driver.js';
 
 // Driver token doğrulama middleware
 export const protectDriver = async (req, res, next) => {
+  console.log('Token geldi mi?', req.headers.authorization);
   try {
     let token;
 
